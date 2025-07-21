@@ -9,7 +9,6 @@ def train_model():
     st.write("Column names in CSV:", df.columns.tolist())
 
     df.columns = [col.strip() for col in df.columns]  # Clean column names
-    st.write("Cleaned column names:", df.columns.tolist())
 
     required_columns = {"Quoted_Price", "Size_sqft", "Coats", "Labor_Hours", "Distance", "Concurrent_Job"}
     if not required_columns.issubset(df.columns):
@@ -32,8 +31,8 @@ model = train_model()
 # App UI
 st.title("Gym Floor Pricing Estimator")
 
-square_feet = st.number_input("Enter square footage", min_value=100, max_value=10000, step=100)
-coats = st.number_input("Enter number of coats", min_value=1, max_value=5, step=1)
+square_feet = st.number_input("Enter square footage", min_value=100, max_value=20000, step=100)
+coats = st.number_input("Enter number of coats", min_value=1, max_value=3, step=1)
 labor_hours = st.number_input("Enter estimated labor hours", min_value=1, max_value=100, step=1)
 distance = st.number_input("Enter distance to site (miles)", min_value=1, max_value=300, step=1)
 concurrent_job = st.selectbox("Is this job concurrent with another?", ["No", "Yes"])
