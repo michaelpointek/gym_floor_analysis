@@ -6,7 +6,6 @@ from sklearn.ensemble import RandomForestRegressor
 @st.cache_resource
 def train_model():
     df = pd.read_csv("gym_floor_raw.csv")
-    st.write("Column names in CSV:", df.columns.tolist())
 
     df.columns = [col.strip() for col in df.columns]  # Clean column names
 
