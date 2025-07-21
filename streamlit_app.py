@@ -28,10 +28,10 @@ model = train_model()
 # App UI
 st.title("Gym Floor Pricing Estimator")
 
-square_feet = st.number_input("Enter square footage", min_value=100, max_value=100000, step=100)
+square_feet = st.number_input("Enter square footage", min_value=4000, max_value=100000, step=100)
 coats = st.selectbox("Number of coats", options=[1, 2])
-labor_hours = st.number_input("Estimated labor hours", min_value=1, max_value=500)
-distance = st.number_input("Distance to job site (miles)", min_value=0, max_value=500)
+labor_hours = st.number_input("Estimated labor hours", min_value=0, max_value=500)
+distance = st.number_input("Distance to job site (miles)", min_value=1, max_value=500)
 concurrent_job = st.selectbox("Is this a concurrent job?", options=["No", "Yes"])
 concurrent_job_flag = 1 if concurrent_job == "Yes" else 0
 
