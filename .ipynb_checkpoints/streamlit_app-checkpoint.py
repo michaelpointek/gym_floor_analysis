@@ -19,12 +19,12 @@ def train_model():
     # st.dataframe(df.head())
 
     # Proceed only if required columns exist
-    required_columns = {"Type", "Square Feet", "Price"}
+    required_columns = {"Quoted_Price", "Size_sqft"}
     if not required_columns.issubset(set(df.columns)):
         st.error(f"Missing one or more required columns: {required_columns}")
         return None, None
 
-    df = df.dropna(subset=["Type", "Square Feet", "Price"])
+    df = df.dropna(subset=["Quoted_Price", "Size_sqft"])
 
     label_enc = LabelEncoder()
     df["Type_encoded"] = label_enc.fit_transform(df["Type"])
