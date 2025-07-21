@@ -4,7 +4,7 @@ from sklearn.ensemble import RandomForestRegressor
 from PIL import Image
 
 logo = Image.open("image.png")  # Replace with your logo filename
-st.image(logo, width=450)  # Adjust width as needed
+st.image(logo, width=300)  # Adjust width as needed
 
 # Load and train model once
 @st.cache_resource
