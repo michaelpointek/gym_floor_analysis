@@ -6,25 +6,38 @@ from sklearn.preprocessing import LabelEncoder
 
 # Load and prepare data
 @st.cache_resource
+@st.cache_resource
 def train_model():
     df = pd.read_csv("gym_floor_raw.csv")
+    st.write("Column names in CSV:", df.columns.tolist())  # 👈 Shows column names
 
-    # Drop rows with missing or incomplete data
+    # You can rename if the actual columns are slightly off
+    df.columns = [col.strip() for col in df.columns]  # Remove extra spaces
+    st.write("Cleaned column names:", df.columns.tolist())
+
+    # Uncomment this to view sample data
+    # st.dataframe(df.head())
+
+    # Proceed only if required columns exist
+    required_columns = {"Type", "Square Feet", "Price"}
+    if not required_columns.issubset(set(df.columns)):
+        st.error(f"Missing one or more required columns: {required_columns}")
+        return None, None
+
     df = df.dropna(subset=["Type", "Square Feet", "Price"])
 
-    # Encode categorical variable
     label_enc = LabelEncoder()
     df["Type_encoded"] = label_enc.fit_transform(df["Type"])
 
     X = df[["Square Feet", "Type_encoded"]]
     y = df["Price"]
 
-    # Train model
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     rf = RandomForestRegressor(n_estimators=100, random_state=42)
     rf.fit(X_train, y_train)
 
     return rf, label_enc
+
 
 # Train once and reuse
 model, label_encoder = train_model()
