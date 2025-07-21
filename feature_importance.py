@@ -30,30 +30,29 @@ if "Quoted_Price" in df.columns:
     df.drop(columns=["Quoted_Price"], inplace=True)
 
 
-# In[12]:
+# In[20]:
 
 
 # Drop non-numeric or irrelevant columns
-df.drop(columns=["Name", "Account#", "Location"], errors='ignore', inplace=True)
+df.drop(columns=["Name", "Account#", "Location", "GP", "GYMLABORAP"], errors='ignore', inplace=True)
 
 # Encode categorical variables
 label_enc = LabelEncoder()
 df["AM"] = label_enc.fit_transform(df["AM"])
 
 
-# In[8]:
+# In[21]:
 
 
 # Drop rows with missing values
 df.dropna(inplace=True)
 
-# Feature/Target Split
-# Drop non-numeric or irrelevant columns
-X = df.drop(columns=["GP%", "Name", "Account#", "Location"], errors='ignore')
-y = df['GP%']
+# Define features and target
+y = df["GP%"]
+X = df.drop(columns=["GP%"])
 
 
-# In[9]:
+# In[22]:
 
 
 # Save feature column names
@@ -63,7 +62,7 @@ X_columns = list(X.columns)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 
-# In[10]:
+# In[23]:
 
 
 # Train model
@@ -71,7 +70,7 @@ rf = RandomForestRegressor(n_estimators=100, random_state=42)
 rf.fit(X_train, y_train)
 
 
-# In[ ]:
+# In[24]:
 
 
 # Save model artifacts
@@ -80,7 +79,7 @@ joblib.dump(label_enc, "label_encoder.pkl")
 joblib.dump(X_columns, "X_columns.pkl")
 
 
-# In[ ]:
+# In[25]:
 
 
 # SHAP analysis
@@ -89,7 +88,7 @@ shap_values = explainer(X_test)
 shap.summary_plot(shap_values, X_test)
 
 
-# In[ ]:
+# In[26]:
 
 
 # Define a function to simulate GP% for a range of quotes
@@ -130,7 +129,7 @@ def simulate_pricing(input_data, model, target_gp=0.45, quote_range=np.arange(0.
     }
 
 
-# In[ ]:
+# In[27]:
 
 
 # --- Export Notebook to .py File ---
