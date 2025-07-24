@@ -1,4 +1,4 @@
-﻿Name,Account#,AM,Size_sqft,Coats,Quoted_Price,GYMLABORAP,Labor_Hours,Distance,Concurrent_Job,GP,GP%
+﻿Name,Account#,AM,Size_sqft,Coats,Quoted_Price,GYMLABORAP,Labor_Hours,Distance,Concurrent_Job,GP,GP_Percentage
 Kings_College,302536,Brian_Deiling,12425,2,8324.75,1842.79,0,114,0,4394.47,0.527880117
 Coppermine,487156,Marty_Carberry,10200,2,6834,1735.66,36,55,0,3086.14,0.451586187
 Littlestown_Elem_Alloway,480333,Marty_Carberry,7840,2,5252.8,652.88,34,51,0,1838.64,0.35003046
