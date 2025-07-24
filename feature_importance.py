@@ -30,7 +30,7 @@ if "Quoted_Price" in df.columns:
     df.drop(columns=["Quoted_Price"], inplace=True)
 
 
-# In[20]:
+# In[4]:
 
 
 # Drop non-numeric or irrelevant columns
@@ -41,7 +41,7 @@ label_enc = LabelEncoder()
 df["AM"] = label_enc.fit_transform(df["AM"])
 
 
-# In[21]:
+# In[5]:
 
 
 # Drop rows with missing values
@@ -52,7 +52,7 @@ y = df["GP%"]
 X = df.drop(columns=["GP%"])
 
 
-# In[22]:
+# In[6]:
 
 
 # Save feature column names
@@ -62,7 +62,7 @@ X_columns = list(X.columns)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 
-# In[23]:
+# In[7]:
 
 
 # Train model
@@ -70,7 +70,7 @@ rf = RandomForestRegressor(n_estimators=100, random_state=42)
 rf.fit(X_train, y_train)
 
 
-# In[24]:
+# In[8]:
 
 
 # Save model artifacts
@@ -79,7 +79,7 @@ joblib.dump(label_enc, "label_encoder.pkl")
 joblib.dump(X_columns, "X_columns.pkl")
 
 
-# In[25]:
+# In[9]:
 
 
 # SHAP analysis
@@ -88,7 +88,7 @@ shap_values = explainer(X_test)
 shap.summary_plot(shap_values, X_test)
 
 
-# In[26]:
+# In[10]:
 
 
 # Define a function to simulate GP% for a range of quotes
@@ -129,7 +129,7 @@ def simulate_pricing(input_data, model, target_gp=0.45, quote_range=np.arange(0.
     }
 
 
-# In[27]:
+# In[11]:
 
 
 # --- Export Notebook to .py File ---
