@@ -14,14 +14,17 @@ def train_models():
     df = pd.read_csv("gym_floor_raw.csv")
     df.columns = [col.strip() for col in df.columns]
 
-    required_columns = {
-        "Quoted_Price", "Size_sqft", "Coats", "Labor_Hours", "Distance", "Concurrent_Job", "GP_Percent"
-    }
-    if not required_columns.issubset(set(df.columns)):
-        st.error(f"Missing one or more required columns: {required_columns}")
+    # Column validation and filtering
+    expected_columns = [
+        "Quoted_Price", "Size_sqft", "Coats",
+        "Labor_Hours", "Distance", "Concurrent_Job", "GP_Percent"
+    ]
+    if not set(expected_columns).issubset(set(df.columns)):
+        st.error(f"Missing one or more required columns: {expected_columns}")
         return None, None
 
-    df = df.dropna(subset=list(required_columns))
+    df = df[expected_columns]  # Only keep relevant columns
+    df = df.dropna(subset=expected_columns)
 
     # Train labor hours prediction model
     X_hours = df[["Size_sqft", "Coats", "Distance", "Concurrent_Job"]]
@@ -31,7 +34,10 @@ def train_models():
 
     # Train GP% prediction model
     df["Quoted_Price_per_sqft"] = df["Quoted_Price"] / df["Size_sqft"]
-    X_gp = df[["Quoted_Price_per_sqft", "Size_sqft", "Coats", "Labor_Hours", "Distance", "Concurrent_Job"]]
+    X_gp = df[[
+        "Quoted_Price_per_sqft", "Size_sqft", "Coats",
+        "Labor_Hours", "Distance", "Concurrent_Job"
+    ]]
     y_gp = df["GP_Percent"]
     gp_model = RandomForestRegressor()
     gp_model.fit(X_gp, y_gp)
@@ -39,6 +45,10 @@ def train_models():
     return labor_model, gp_model
 
 labor_model, gp_model = train_models()
+
+# Halt app if models failed to train
+if labor_model is None or gp_model is None:
+    st.stop()
 
 # App UI
 st.title("Gym Floor Pricing Estimator")
@@ -57,9 +67,8 @@ if st.button("Estimate Price"):
     # Step 2: Price loop to ensure GP% >= 45% and respect floor pricing
     floor_price = 0.67 if coats == 2 else 0.48
     best_price_per_sqft = floor_price
-    
+
     for price_per_sqft in np.arange(floor_price, 2.0, 0.01):
-        total_price = price_per_sqft * square_feet
         gp_input = [[
             price_per_sqft,
             square_feet,
