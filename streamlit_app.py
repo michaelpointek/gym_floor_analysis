@@ -89,3 +89,37 @@ if st.button("Estimate"):
     st.write(f"Total est.:  ${total:,.2f}")
 
     log_prediction(job_id, sqft, coats, dist, conc_flag, ph, best_ppsf, total)
+    push_log_to_github()
+
+import base64
+import requests
+
+def push_log_to_github():
+    with open("labor_predictions_log.csv", "rb") as f:
+        encoded = base64.b64encode(f.read()).decode()
+
+    url = f"https://api.github.com/repos/{st.secrets['github']['repo']}/contents/labor_predictions_log.csv"
+    headers = {
+        "Authorization": f"Bearer {st.secrets['github']['token']}",
+        "Accept": "application/vnd.github+json"
+    }
+
+    # Check if file already exists (needed to get SHA for overwrite)
+    resp = requests.get(url, headers=headers)
+    if resp.status_code == 200:
+        sha = resp.json()["sha"]
+        payload = {
+            "message": "Update log file",
+            "content": encoded,
+            "sha": sha,
+            "branch": st.secrets["github"]["branch"]
+        }
+    else:
+        payload = {
+            "message": "Create log file",
+            "content": encoded,
+            "branch": st.secrets["github"]["branch"]
+        }
+
+    push = requests.put(url, headers=headers, json=payload)
+    st.success("Logs pushed to GitHub securely.")
