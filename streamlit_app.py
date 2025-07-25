@@ -89,7 +89,6 @@ if st.button("Estimate"):
     st.write(f"Total est.:  ${total:,.2f}")
 
     log_prediction(job_id, sqft, coats, dist, conc_flag, ph, best_ppsf, total)
-    push_log_to_github()
 
 import base64
 import requests
@@ -123,3 +122,4 @@ def push_log_to_github():
 
     push = requests.put(url, headers=headers, json=payload)
     st.success("Logs pushed to GitHub securely.")
+    push_log_to_github()
