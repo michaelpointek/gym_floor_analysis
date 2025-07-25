@@ -1,4 +1,4 @@
-﻿Name,Size_sqft,Coats,Labor_Hours,Distance,Concurrent_Job,Synthetic
+﻿job_id,Size_sqft,Coats,Actual_Labor_Hours,Distance,Concurrent_Job,Synthetic
 Coppermine,10200,2,36,55,0,0
 Littlestown_Elem_Alloway,7840,2,34,51,0,0
 City_of_York,10000,2,26.75,25,0,0
