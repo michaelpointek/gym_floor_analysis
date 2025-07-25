@@ -1,153 +1,91 @@
 import os
-from datetime import datetime
-
-import streamlit as st
 import pandas as pd
-import numpy as np
-from PIL import Image
-
+import streamlit as st
+from datetime import datetime
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 
 # -----------------------------------------------------------------------------
-# 1. LOGGING FUNCTION
+# A) LOGGING PREDICTIONS
 # -----------------------------------------------------------------------------
-def log_prediction(
-    square_feet: float,
-    coats: int,
-    distance: float,
-    concurrent_job: int,
-    predicted_labor: float,
-    price_per_sqft: float,
-    total_price: float,
-    logfile: str = "labor_predictions_log.csv"
-):
-    """Append this run’s inputs + outputs to the CSV log."""
-    # Ensure file exists and has a header row
-    file_exists = os.path.isfile(logfile)
-    with open(logfile, "a", newline="") as f:
-        writer = pd.io.common.csv.writer(f)
-        if not file_exists:
-            writer.writerow([
-                "timestamp",
-                "Size_sqft",
-                "Coats",
-                "Distance",
-                "Concurrent_Job",
-                "Predicted_Labor_Hours",
-                "Price_per_sqft",
-                "Total_Price"
-            ])
-        writer.writerow([
-            datetime.now().isoformat(),
-            square_feet,
-            coats,
-            distance,
-            concurrent_job,
-            round(predicted_labor, 2),
-            round(price_per_sqft, 2),
-            round(total_price, 2)
-        ])
-
+def log_prediction(job_id, sqft, coats, dist, conc, pred_hours, ppsf, total):
+    logfile = "data/prediction_log.csv"
+    first = not os.path.isfile(logfile)
+    row = {
+        "timestamp": datetime.now().isoformat(),
+        "job_id": job_id,
+        "Size_sqft": sqft,
+        "Coats": coats,
+        "Distance": dist,
+        "Concurrent_Job": conc,
+        "Predicted_Labor_Hours": round(pred_hours,2),
+        "Price_per_sqft": round(ppsf,2),
+        "Total_Price": round(total,2)
+    }
+    pd.DataFrame([row]).to_csv(logfile, mode="a", index=False, header=first)
 
 # -----------------------------------------------------------------------------
-# 2. MODEL TRAINING (cached)
+# B) TRAINING MODELS (cached)
 # -----------------------------------------------------------------------------
 @st.cache_resource(ttl=3600)
 def train_models():
-    # -- 2.1 Train the labor-hours model on your log CSV
-    log_df = pd.read_csv("labor_predictions_log.csv")
-    log_df = log_df.dropna(subset=[
-        "Size_sqft", "Coats", "Distance", "Concurrent_Job", "Predicted_Labor_Hours"
+    # 1) LinearRegression on your ground_truth file
+    gt = pd.read_csv("data/ground_truth.csv")
+    gt = gt.dropna(subset=[
+        "Size_sqft","Coats","Distance","Concurrent_Job","Actual_Labor_Hours"
     ])
+    X_lab = gt[["Size_sqft","Coats","Distance","Concurrent_Job"]]
+    y_lab = gt["Actual_Labor_Hours"]
+    labor_model = LinearRegression().fit(X_lab, y_lab)
 
-    X_labor = log_df[["Size_sqft", "Coats", "Distance", "Concurrent_Job"]]
-    y_labor = log_df["Predicted_Labor_Hours"]
-    labor_model = LinearRegression().fit(X_labor, y_labor)
-
-    # -- 2.2 Train the GP% model on your raw gym_floor data
-    raw = pd.read_csv("gym_floor_raw.csv")
-    raw.columns = [c.strip() for c in raw.columns]
-    required = {
-        "Quoted_Price", "Size_sqft", "Coats",
-        "Labor_Hours", "Distance", "Concurrent_Job", "GP_Percent"
-    }
-    if not required.issubset(raw.columns):
-        st.error(f"Missing columns: {required - set(raw.columns)}")
-        return None, None
-
-    raw = raw[list(required)].dropna()
-    raw["Quoted_Price_per_sqft"] = raw["Quoted_Price"] / raw["Size_sqft"]
-
-    X_gp = raw[[
+    # 2) RandomForestRegressor for GP%
+    rf_df = pd.read_csv("data/gym_floor_raw.csv")
+    # … your existing gym_floor preprocessing …
+    rf_df["Quoted_Price_per_sqft"] = rf_df["Quoted_Price"] / rf_df["Size_sqft"]
+    X_gp = rf_df[[
         "Quoted_Price_per_sqft",
-        "Size_sqft",
-        "Coats",
-        "Labor_Hours",
-        "Distance",
-        "Concurrent_Job"
+        "Size_sqft","Coats","Labor_Hours","Distance","Concurrent_Job"
     ]]
-    y_gp = raw["GP_Percent"]
+    y_gp = rf_df["GP_Percent"]
     gp_model = RandomForestRegressor().fit(X_gp, y_gp)
 
     return labor_model, gp_model
 
-
 # -----------------------------------------------------------------------------
-# 3. INITIALIZE
+# C) STREAMLIT UI
 # -----------------------------------------------------------------------------
 labor_model, gp_model = train_models()
-if labor_model is None or gp_model is None:
-    st.stop()
 
-# -----------------------------------------------------------------------------
-# 4. APP UI
-# -----------------------------------------------------------------------------
-logo = Image.open("image.png")
-st.image(logo, width=300)
-st.title("Gym Floor Pricing Estimator")
+st.title("Gym Floor Estimator")
 
-square_feet       = st.number_input("Square footage", min_value=4000, max_value=100000, step=100)
-coats             = st.selectbox("Number of coats", options=[1, 2])
-distance          = st.number_input("Distance to job site (miles)", min_value=1, max_value=500)
-concurrent        = st.selectbox("Concurrent job?", options=["No", "Yes"])
-concurrent_flag   = 1 if concurrent == "Yes" else 0
+# generate or input a job_id
+job_id = st.text_input("Job ID", value=str(int(datetime.now().timestamp())))
 
-if st.button("Estimate Price"):
-    # Step 1: Predict labor hours
-    inp = [[square_feet, coats, distance, concurrent_flag]]
-    predicted_labor = float(labor_model.predict(inp)[0])
+sqft  = st.number_input("Square footage", value=5000, step=100)
+coats = st.selectbox("Coats", [1,2])
+dist  = st.number_input("Distance (miles)", value=5, step=1)
+conc  = st.selectbox("Concurrent job?", ["No","Yes"])
+conc_flag = 1 if conc=="Yes" else 0
 
-    # Step 2: Loop to satisfy GP% ≥ 45% & floor pricing
-    floor_price = 0.67 if coats == 2 else 0.48
-    best_ppsf   = floor_price
-    for ppsf in np.arange(floor_price, 2.01, 0.01):
-        gp_in = [[
-            ppsf,
-            square_feet,
-            coats,
-            predicted_labor,
-            distance,
-            concurrent_flag
-        ]]
+if st.button("Estimate"):
+    # 1) Predict labor hours
+    inp = [[sqft, coats, dist, conc_flag]]
+    ph = float(labor_model.predict(inp)[0])
+
+    # 2) Find price‐per‐sqft for ≥45% GP
+    floor_ppsf = 0.67 if coats==2 else 0.48
+    best_ppsf = floor_ppsf
+    for p in [floor_ppsf + 0.01*i for i in range(0,200)]:
+        gp_in = [[p, sqft, coats, ph, dist, conc_flag]]
         if gp_model.predict(gp_in)[0] >= 45.0:
-            best_ppsf = ppsf
+            best_ppsf = round(p,2)
             break
 
-    total_estimate = best_ppsf * square_feet
+    total = best_ppsf * sqft
 
-    # Step 3: Display & log
-    st.subheader("Estimate")
-    st.write(f"Predicted labor hours: {predicted_labor:.1f}")
-    st.write(f"Price per sq ft:       ${best_ppsf:.2f}")
-    st.write(f"Total estimated price: ${total_estimate:,.2f}")
+    # 3) Display & log
+    st.write(f"Pred labor hrs: {ph:.1f}")
+    st.write(f"Price/sqft:  ${best_ppsf:.2f}")
+    st.write(f"Total est.:  ${total:,.2f}")
 
-    log_prediction(
-        square_feet,
-        coats,
-        distance,
-        concurrent_flag,
-        predicted_labor,
-        best_ppsf,
-        total_estimate
-    )
+    log_prediction(job_id, sqft, coats, dist, conc_flag, ph, best_ppsf, total)
