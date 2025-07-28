@@ -9,7 +9,7 @@ from sklearn.ensemble import RandomForestRegressor
 # A) LOGGING PREDICTIONS
 # -----------------------------------------------------------------------------
 def log_prediction(job_id, sqft, coats, dist, conc, pred_hours, ppsf, total):
-    logfile = "data/prediction_log.csv"
+    logfile = "data/labor_predictions_log.csv"
     first = not os.path.isfile(logfile)
     row = {
         "timestamp": datetime.now().isoformat(),
