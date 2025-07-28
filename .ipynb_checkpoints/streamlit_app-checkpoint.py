@@ -123,3 +123,34 @@ def push_log_to_github():
     push = requests.put(url, headers=headers, json=payload)
     st.success("Logs pushed to GitHub securely.")
     push_log_to_github()
+
+import pandas as pd
+import streamlit as st
+from pathlib import Path
+
+def load_prediction_log(log_path='labor_predictions_log.csv'):
+    if Path(log_path).exists():
+        return pd.read_csv(log_path)
+    else:
+        st.warning("Log file not found. Make sure it’s being synced correctly.")
+        return pd.DataFrame()
+
+def display_log_panel():
+    st.subheader("📊 Prediction Log Viewer")
+    df_log = load_prediction_log()
+    
+    if df_log.empty:
+        st.info("No log data available.")
+        return
+    
+    # Filter by job status or coat count if useful
+    job_statuses = df_log['concurrent_job_status'].unique()
+    selected_status = st.selectbox("Filter by Concurrent Job Status", job_statuses)
+    filtered = df_log[df_log['concurrent_job_status'] == selected_status]
+
+    st.write("Filtered Log Entries")
+    st.dataframe(filtered)
+
+    # Optional: Add summary stats
+    st.write("📈 Summary Statistics")
+    st.write(filtered.describe())
