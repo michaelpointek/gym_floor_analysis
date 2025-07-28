@@ -156,3 +156,7 @@ def display_log_panel():
     st.write(filtered.describe())
 
 display_log_panel()
+
+import os
+st.write("Current working directory:", os.getcwd())
+st.write("File exists:", os.path.exists("data/labor_predictions_log.csv"))
