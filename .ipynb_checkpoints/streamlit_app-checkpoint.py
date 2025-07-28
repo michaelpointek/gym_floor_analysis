@@ -135,6 +135,16 @@ def load_prediction_log(log_path='data/labor_predictions_log.csv'):
         st.warning("Log file not found. Make sure it’s being synced correctly.")
         return pd.DataFrame()
 
+def display_admin_panel():
+    st.subheader("🔒 Admin Panel")
+
+    access_key = st.text_input("Enter admin passcode", type="password")
+    if access_key == st.secrets["admin"]["passcode"]:
+        st.success("Access granted.")
+        display_log_panel()
+    else:
+        st.info("Enter passcode to view logs.")
+
 def display_log_panel():
     st.subheader("📊 Prediction Log Viewer")
     df_log = load_prediction_log()
@@ -155,4 +165,4 @@ def display_log_panel():
     st.write("📈 Summary Statistics")
     st.write(filtered.describe())
 
-display_log_panel()
+display_admin_panel()
