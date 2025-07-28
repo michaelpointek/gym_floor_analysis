@@ -128,7 +128,7 @@ import pandas as pd
 import streamlit as st
 from pathlib import Path
 
-def load_prediction_log(log_path='labor_predictions_log.csv'):
+def load_prediction_log(log_path='data/labor_predictions_log.csv'):
     if Path(log_path).exists():
         return pd.read_csv(log_path)
     else:
@@ -156,7 +156,3 @@ def display_log_panel():
     st.write(filtered.describe())
 
 display_log_panel()
-
-import os
-st.write("Current working directory:", os.getcwd())
-st.write("File exists:", os.path.exists("data/labor_predictions_log.csv"))
