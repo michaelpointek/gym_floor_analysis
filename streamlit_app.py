@@ -38,18 +38,28 @@ def train_models():
     y_lab = gt["Actual_Labor_Hours"]
     labor_model = LinearRegression().fit(X_lab, y_lab)
 
-    # 2) RandomForestRegressor for GP%
     rf_df = pd.read_csv("data/gym_floor_raw.csv")
-    # … your existing gym_floor preprocessing …
-    rf_df["Quoted_Price_per_sqft"] = rf_df["Quoted_Price"] / rf_df["Size_sqft"]
-    X_gp = rf_df[[
-        "Quoted_Price_per_sqft",
-        "Size_sqft","Coats","Labor_Hours","Distance","Concurrent_Job"
-    ]]
-    y_gp = rf_df["GP_Percent"]
-    gp_model = RandomForestRegressor().fit(X_gp, y_gp)
 
-    return labor_model, gp_model
+    # Ensure no missing values
+    rf_df = rf_df.dropna(subset=[
+        "Quoted_Price", "Size_sqft", "Coats", "Labor_Hours",
+        "Distance", "Concurrent_Job", "Labor_Cost", "v_mat_cost"
+    ])
+
+    # Engineering new fields
+    rf_df["Quoted_Price_per_sqft"] = rf_df["Quoted_Price"] / rf_df["Size_sqft"]
+    rf_df["Quoted_Price_total"] = rf_df["Quoted_Price"]  # optional alias
+    rf_df["Total_Cost"] = rf_df["Labor_Cost"] + rf_df["v_mat_cost"]
+    rf_df["GP_Percent"] = (rf_df["Quoted_Price_total"] - rf_df["Total_Cost"]) / rf_df["Quoted_Price_total"] * 100
+
+    X_gp = rf_df[[ 
+    "Quoted_Price_per_sqft",
+    "Size_sqft", "Coats", "Labor_Hours", 
+    "Distance", "Concurrent_Job", "Labor_Cost", "v_mat_cost"
+]]
+y_gp = rf_df["GP_Percent"]
+
+gp_model = RandomForestRegressor().fit(X_gp, y_gp)
 
 # -----------------------------------------------------------------------------
 # C) STREAMLIT UI
