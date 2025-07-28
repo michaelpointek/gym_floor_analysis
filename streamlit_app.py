@@ -82,25 +82,27 @@ if st.button("Estimate"):
             break
 
     total = best_ppsf * sqft
-        
+
     # 3) Display & log
     st.write(f"Pred labor hrs: {ph:.1f}")
     st.write(f"Price/sqft:  ${best_ppsf:.2f}")
     st.write(f"Total est.:  ${total:,.2f}")
 
     log_prediction(job_id, sqft, coats, dist, conc_flag, ph, best_ppsf, total)
+
+    # 4) GP sweep chart
     prices = [floor_ppsf + 0.01*i for i in range(0,200)]
     gps = [gp_model.predict([[p, sqft, coats, ph, dist, conc_flag]])[0] for p in prices]
     st.line_chart(pd.DataFrame({"Price": prices, "Predicted GP": gps}))
 
-    #4 loop logic testing
-for p in [floor_ppsf + 0.01*i for i in range(0,200)]:
-    gp_in = [[p, sqft, coats, ph, dist, conc_flag]]
-    gp_val = gp_model.predict(gp_in)[0]
-    st.write(f"Trying ${p:.2f} → GP%: {gp_val:.2f}")
-    if gp_val >= 45.0:
-        best_ppsf = round(p, 2)
-        break
+    # 5) Debug: loop logic testing
+    for p in prices:
+        gp_in = [[p, sqft, coats, ph, dist, conc_flag]]
+        gp_val = gp_model.predict(gp_in)[0]
+        st.write(f"Trying ${p:.2f} → GP%: {gp_val:.2f}")
+        if gp_val >= 45.0:
+            best_ppsf = round(p, 2)
+            break
 
 import base64
 import requests
