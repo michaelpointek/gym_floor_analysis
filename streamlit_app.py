@@ -78,7 +78,7 @@ for p in [floor_ppsf + 0.01*i for i in range(0,200)]:
     gp_val = gp_model.predict(gp_in)[0]
     st.write(f"Trying ${p:.2f} → GP%: {gp_val:.2f}")
     if gp_val >= 45.0:
-        best_ppsf = round(p,2)
+        best_ppsf = round(p, 2)
         break
 
     # 2) Find price‐per‐sqft for ≥45% GP
