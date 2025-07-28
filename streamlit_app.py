@@ -144,9 +144,9 @@ def display_log_panel():
         return
     
     # Filter by job status or coat count if useful
-    job_statuses = df_log['concurrent_job_status'].unique()
-    selected_status = st.selectbox("Filter by Concurrent Job Status", job_statuses)
-    filtered = df_log[df_log['concurrent_job_status'] == selected_status]
+    job_statuses = df_log['concurrent_job'].unique()
+    selected_status = st.selectbox("Filter by Concurrent Job", job_statuses)
+    filtered = df_log[df_log['concurrent_job'] == selected_status]
 
     st.write("Filtered Log Entries")
     st.dataframe(filtered)
