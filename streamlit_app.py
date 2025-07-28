@@ -154,3 +154,5 @@ def display_log_panel():
     # Optional: Add summary stats
     st.write("📈 Summary Statistics")
     st.write(filtered.describe())
+
+display_log_panel()
