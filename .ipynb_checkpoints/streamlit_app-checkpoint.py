@@ -73,13 +73,13 @@ if st.button("Estimate"):
     ph = float(labor_model.predict(inp)[0])
 
     #1.5 loop logic testing
-    for p in [floor_ppsf + 0.01*i for i in range(0,200)]:
-        gp_in = [[p, sqft, coats, ph, dist, conc_flag]]
-        gp_val = gp_model.predict(gp_in)[0]
-        st.write(f"Trying ${p:.2f} → GP%: {gp_val:.2f}")
-        if gp_val >= 45.0:
-            best_ppsf = round(p,2)
-            break
+for p in [floor_ppsf + 0.01*i for i in range(0,200)]:
+    gp_in = [[p, sqft, coats, ph, dist, conc_flag]]
+    gp_val = gp_model.predict(gp_in)[0]
+    st.write(f"Trying ${p:.2f} → GP%: {gp_val:.2f}")
+    if gp_val >= 45.0:
+        best_ppsf = round(p,2)
+        break
 
     # 2) Find price‐per‐sqft for ≥45% GP
     floor_ppsf = 0.67 if coats==2 else 0.48
