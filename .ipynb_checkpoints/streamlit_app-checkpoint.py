@@ -56,10 +56,18 @@ def train_models():
     "Quoted_Price_per_sqft",
     "Size_sqft", "Coats", "Labor_Hours", 
     "Distance", "Concurrent_Job", "Labor_Cost", "v_mat_cost"
-]]
-y_gp = rf_df["GP_Percent"]
+    ]]
+    X_gp = rf_df[[ 
+        "Quoted_Price_per_sqft",
+        "Size_sqft", "Coats", "Labor_Hours", 
+        "Distance", "Concurrent_Job", "Labor_Cost", "v_mat_cost"
+    ]]
+    y_gp = rf_df["GP_Percent"]
 
-gp_model = RandomForestRegressor().fit(X_gp, y_gp)
+    gp_model = RandomForestRegressor().fit(X_gp, y_gp)
+
+    return labor_model, gp_model
+
 
 # -----------------------------------------------------------------------------
 # C) STREAMLIT UI
