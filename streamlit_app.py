@@ -113,9 +113,14 @@ if st.button("Estimate"):
     # 4) GP sweep chart
     prices = [floor_ppsf + 0.01*i for i in range(0,200)]
     gps = []
+    
     for p in prices:
         labor_cost = ph * 19.4
-        v_mat_cost = 0.46 * (p * sqft)
+        if coats == 1:
+            v_mat_cost = 0.1981171 * sqft
+        else:
+            v_mat_cost = 0.3175879 * sqft
+    
         gp_val = gp_model.predict([[p, sqft, coats, ph, dist, conc_flag, labor_cost, v_mat_cost]])[0]
         gps.append(gp_val)
     
@@ -123,6 +128,7 @@ if st.button("Estimate"):
         if gp_val >= 45.0:
             best_ppsf = round(p, 2)
             break
+
 
 import base64
 import requests
