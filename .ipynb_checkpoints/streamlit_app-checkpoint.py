@@ -57,7 +57,7 @@ def train_models():
     "Size_sqft", "Coats", "Labor_Hours", 
     "Distance", "Concurrent_Job", "Labor_Cost", "v_mat_cost"
 ]]
-y_gp = df["GP_Percent"]
+y_gp = rf_df["GP_Percent"]
 
 gp_model = RandomForestRegressor().fit(X_gp, y_gp)
 
