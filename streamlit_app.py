@@ -93,6 +93,8 @@ if st.button("Estimate"):
     # 2) Find price‐per‐sqft for ≥45% GP
     floor_ppsf = 0.67 if coats==2 else 0.48
     best_ppsf = floor_ppsf
+    labor_cost = ph * 19.4
+    v_mat_cost = 0.46 * (sqft * floor_ppsf)
     for p in [floor_ppsf + 0.01*i for i in range(0,200)]:
         gp_in = [[p, sqft, coats, ph, dist, conc_flag, Labor_Cost, v_mat_cost]]
         if gp_model.predict(gp_in)[0] >= 45.0:
