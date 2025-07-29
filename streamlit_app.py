@@ -96,7 +96,7 @@ if st.button("Estimate"):
     labor_cost = ph * 19.4
     v_mat_cost = 0.46 * (sqft * floor_ppsf)
     for p in [floor_ppsf + 0.01*i for i in range(0,200)]:
-        gp_in = [[p, sqft, coats, ph, dist, conc_flag, Labor_Cost, v_mat_cost]]
+        gp_in = [[p, sqft, coats, ph, dist, conc_flag, labor_cost, v_mat_cost]]
         if gp_model.predict(gp_in)[0] >= 45.0:
             best_ppsf = round(p,2)
             break
