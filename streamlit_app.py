@@ -112,13 +112,13 @@ if st.button("Estimate"):
 
     # 4) GP sweep chart
     prices = [floor_ppsf + 0.01*i for i in range(0,200)]
-    gps = [gp_model.predict([[p, sqft, coats, ph, dist, conc_flag]])[0] for p in prices]
-    st.line_chart(pd.DataFrame({"Price": prices, "Predicted GP": gps}))
-
-    # 5) Debug: loop logic testing
+    gps = []
     for p in prices:
-        gp_in = [[p, sqft, coats, ph, dist, conc_flag]]
-        gp_val = gp_model.predict(gp_in)[0]
+        labor_cost = ph * 19.4
+        v_mat_cost = 0.46 * (p * sqft)
+        gp_val = gp_model.predict([[p, sqft, coats, ph, dist, conc_flag, labor_cost, v_mat_cost]])[0]
+        gps.append(gp_val)
+    
         st.write(f"Trying ${p:.2f} → GP%: {gp_val:.2f}")
         if gp_val >= 45.0:
             best_ppsf = round(p, 2)
