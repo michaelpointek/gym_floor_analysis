@@ -34,9 +34,9 @@ def train_models():
         "Size_sqft","Coats","Distance","Concurrent_Job","Actual_Labor_Hours"
     ])
     avg_vmat_by_coat = (
-        ground_truth
-        .assign(vmat_per_sqft = ground_truth["v_mat_cost"] / ground_truth["sqft"])
-        .groupby("coats")["vmat_per_sqft"]
+        gt
+        .assign(vmat_per_sqft = gt["v_mat_cost"] / gt["Size_sqft"])
+        .groupby("Coats")["vmat_per_sqft"]
         .mean()
         .to_dict()
     )
