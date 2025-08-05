@@ -90,7 +90,7 @@ if st.button("Estimate"):
     st.write(f"Pred labor hrs: {ph:.1f}")
     st.write(f"Target GP%: {target_gp*100:.0f}%")
     st.write(f"Price/sqft:  ${best_ppsf:.2f}")
-    st.write(f"Total est.:  ${(best_ppsf * sqft),.2f}")
+    st.write(f"Total est.:  ${best_ppsf * sqft,.2f}")
 
     log_prediction(job_id, sqft, coats, dist, conc_flag, ph, best_ppsf, total)
 
