@@ -31,7 +31,7 @@ def log_prediction(job_id, sqft, coats, dist, conc, pred_hours, ppsf, total):
 @st.cache_resource(ttl=3600)
 def train_models():
     gt = pd.read_csv("data/ground_truth.csv").dropna(subset=[
-        "Size_sqft","Coats","Distance","Concurrent_Job","Actual_Labor_Hours"
+        "Size_sqft", "Coats", "Distance", "Concurrent_Job", "Actual_Labor_Hours", "v_mat_cost"
     ])
     avg_vmat_by_coat = (
         gt
