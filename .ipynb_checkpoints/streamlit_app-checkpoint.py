@@ -91,7 +91,14 @@ if st.button("Estimate"):
     st.write(f"Target GP%: {target_gp*100:.0f}%")
     st.write(f"Price/sqft:  ${best_ppsf:.2f}")
     st.write(f"Total est.:  ${best_ppsf * sqft:,.2f}")
-
+    
+    with st.expander("Show calculation breakdown"):
+        st.write(f"Labor hours: {ph:.2f}")
+        st.write(f"Target GP%: {target_gp:.2%}")
+        st.write(f"Price per sqft: ${best_ppsf:.2f}")
+        st.write(f"Square footage: {sqft:,}")
+        st.write(f"Total price: ${best_ppsf * sqft:,.2f}")
+        
     log_prediction(job_id, sqft, coats, dist, conc_flag, ph, best_ppsf, total)
 
 # ---------------------------------------------------------------------
