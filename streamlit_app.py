@@ -33,6 +33,13 @@ def train_models():
     gt = pd.read_csv("data/ground_truth.csv").dropna(subset=[
         "Size_sqft","Coats","Distance","Concurrent_Job","Actual_Labor_Hours"
     ])
+    avg_vmat_by_coat = (
+        ground_truth
+        .assign(vmat_per_sqft = ground_truth["v_mat_cost"] / ground_truth["sqft"])
+        .groupby("coats")["vmat_per_sqft"]
+        .mean()
+        .to_dict()
+    )
     X_lab = gt[["Size_sqft","Coats","Distance","Concurrent_Job"]]
     y_lab = gt["Actual_Labor_Hours"]
     labor_model = LinearRegression().fit(X_lab, y_lab)
@@ -57,9 +64,10 @@ def train_models():
 # ---------------------------------------------------------------------
 # C) REVERSE GP% PRICING FUNCTION
 # ---------------------------------------------------------------------
-def compute_target_ppsf(sqft, coats, labor_hours, target_gp):
+def compute_target_ppsf(sqft, coats, labor_hours, target_gp, avg_vmat_by_coat):
     labor_cost = labor_hours * 19.4
-    v_mat_cost = (0.1981171 if coats == 1 else 0.3175879) * sqft
+    v_mat_rate = avg_vmat_by_coat.get(coats, 0)  # fallback to 0 if coats not found
+    v_mat_cost = v_mat_rate * sqft
     total_cost = labor_cost + v_mat_cost
     target_price = total_cost / (1 - target_gp)
     target_ppsf = math.ceil((target_price / sqft) * 100) / 100
