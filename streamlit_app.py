@@ -6,6 +6,7 @@ from datetime import datetime
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 
+
 # ---------------------------------------------------------------------
 # A) LOGGING PREDICTIONS
 # ---------------------------------------------------------------------
@@ -33,9 +34,13 @@ def train_models():
     gt = pd.read_csv("data/ground_truth.csv").dropna(subset=[
         "Size_sqft", "Coats", "Distance", "Concurrent_Job", "Actual_Labor_Hours", "v_mat_cost"
     ])
+    rf_df = pd.read_csv("data/gym_floor_raw.csv").dropna(subset=[
+    "Quoted_Price", "Size_sqft", "Coats", "Labor_Hours",
+    "Distance", "Concurrent_Job", "Labor_Cost", "v_mat_cost"
+    ])
     avg_vmat_by_coat = (
-        gt
-        .assign(vmat_per_sqft = gt["v_mat_cost"] / gt["Size_sqft"])
+        rf_df
+        .assign(vmat_per_sqft = rf_df["v_mat_cost"] / rf_df["Size_sqft"])
         .groupby("Coats")["vmat_per_sqft"]
         .mean()
         .to_dict()
@@ -59,7 +64,8 @@ def train_models():
     y_gp = rf_df["GP_Percent"]
     gp_model = RandomForestRegressor().fit(X_gp, y_gp)
 
-    return labor_model, gp_model
+    return labor_model, gp_model, avg_vmat_by_coat
+
 
 # ---------------------------------------------------------------------
 # C) REVERSE GP% PRICING FUNCTION
@@ -76,7 +82,7 @@ def compute_target_ppsf(sqft, coats, labor_hours, target_gp, avg_vmat_by_coat):
 # ---------------------------------------------------------------------
 # D) STREAMLIT UI
 # ---------------------------------------------------------------------
-labor_model, gp_model = train_models()
+labor_model, gp_model, avg_vmat_by_coat = train_models()
 
 st.title("Gym Floor Estimator")
 
