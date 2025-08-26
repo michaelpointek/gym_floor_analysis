@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 
 # Load and clean the dataset
-df = pd.read_csv("gym_floor_raw.csv")
+df = pd.read_csv("data/gym_floor_raw.csv")
 
 
 # In[3]:
@@ -41,18 +41,18 @@ label_enc = LabelEncoder()
 df["AM"] = label_enc.fit_transform(df["AM"])
 
 
-# In[5]:
+# In[7]:
 
 
 # Drop rows with missing values
 df.dropna(inplace=True)
 
 # Define features and target
-y = df["GP%"]
-X = df.drop(columns=["GP%"])
+y = df["GP_Percent"]
+X = df.drop(columns=["GP_Percent"])
 
 
-# In[6]:
+# In[8]:
 
 
 # Save feature column names
@@ -62,7 +62,7 @@ X_columns = list(X.columns)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 
-# In[7]:
+# In[9]:
 
 
 # Train model
@@ -70,7 +70,7 @@ rf = RandomForestRegressor(n_estimators=100, random_state=42)
 rf.fit(X_train, y_train)
 
 
-# In[8]:
+# In[10]:
 
 
 # Save model artifacts
@@ -79,7 +79,7 @@ joblib.dump(label_enc, "label_encoder.pkl")
 joblib.dump(X_columns, "X_columns.pkl")
 
 
-# In[9]:
+# In[11]:
 
 
 # SHAP analysis
@@ -88,7 +88,7 @@ shap_values = explainer(X_test)
 shap.summary_plot(shap_values, X_test)
 
 
-# In[10]:
+# In[12]:
 
 
 # Define a function to simulate GP% for a range of quotes
@@ -129,7 +129,7 @@ def simulate_pricing(input_data, model, target_gp=0.45, quote_range=np.arange(0.
     }
 
 
-# In[11]:
+# In[13]:
 
 
 # --- Export Notebook to .py File ---
